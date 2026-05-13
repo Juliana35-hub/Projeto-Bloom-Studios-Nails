@@ -1,21 +1,24 @@
 import React from 'react';
+import htm from 'htm';
 
-const ServiceCard = ({ title, price, duration, description }) => (
-    <div className="bg-white p-10 rounded-bloom shadow-bloom border border-bloom-gray/30 hover:border-bloom-lilac transition-all hover:-translate-y-2 group">
-        <div className="w-12 h-12 bg-bloom-offWhite text-bloom-purple rounded-full flex items-center justify-center mb-6 group-hover:bg-bloom-lilac group-hover:text-white transition-colors">
-            <i data-lucide="sparkle" className="w-6 h-6"></i>
+const html = htm.bind(React.createElement);
+
+const ServiceCard = ({ title, price, duration, description }) => html`
+    <div class="bg-white p-10 rounded-bloom shadow-bloom border border-bloom-gray/30 hover:border-bloom-lilac transition-all hover:-translate-y-2 group">
+        <div class="w-12 h-12 bg-bloom-offWhite text-bloom-purple rounded-full flex items-center justify-center mb-6 group-hover:bg-bloom-lilac group-hover:text-white transition-colors">
+            <i data-lucide="sparkle" class="w-6 h-6"></i>
         </div>
-        <h3 className="text-2xl font-serif mb-3 text-bloom-graphite">{title}</h3>
-        <div className="flex justify-between text-[10px] uppercase tracking-[0.2em] text-bloom-purple font-bold mb-6">
-            <span className="flex items-center gap-1"><i data-lucide="clock" className="w-3 h-3"></i> {duration}</span>
-            <span className="bg-bloom-nude/20 px-2 py-0.5 rounded">{price}</span>
+        <h3 class="text-2xl font-serif mb-3 text-bloom-graphite">${title}</h3>
+        <div class="flex justify-between text-[10px] uppercase tracking-[0.2em] text-bloom-purple font-bold mb-6">
+            <span class="flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> ${duration}</span>
+            <span class="bg-bloom-nude/20 px-2 py-0.5 rounded">${price}</span>
         </div>
-        <p className="text-bloom-graphite/60 text-sm leading-relaxed mb-8">{description}</p>
-        <a href="#agendar" className="inline-block w-full py-3 text-center border-2 border-bloom-purple text-bloom-purple rounded-bloom text-xs uppercase tracking-widest font-bold hover:bg-bloom-purple hover:text-white transition-all">
+        <p class="text-bloom-graphite/60 text-sm leading-relaxed mb-8">${description}</p>
+        <a href="#agendar" class="inline-block w-full py-3 text-center border-2 border-bloom-purple text-bloom-purple rounded-bloom text-xs uppercase tracking-widest font-bold hover:bg-bloom-purple hover:text-white transition-all">
             Selecionar serviço
         </a>
     </div>
-);
+`;
 
 const Services = () => {
     const categories = [
@@ -37,29 +40,29 @@ const Services = () => {
         }
     ];
 
-    return (
-        <div className="pt-32 pb-24 px-6 fade-in bg-bloom-offWhite">
-            <div className="max-w-6xl mx-auto">
-                <div className="text-center mb-24">
-                    <span className="font-sans text-xs uppercase tracking-[0.4em] text-bloom-purple font-bold">Experiências Bloom</span>
-                    <h2 className="text-6xl font-serif mt-4 text-bloom-graphite">Menu de Serviços</h2>
-                    <div className="w-24 h-1 bg-bloom-lilac mx-auto mt-8 rounded-full"></div>
+    return html`
+        <div class="pt-32 pb-24 px-6 fade-in bg-bloom-offWhite">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-24">
+                    <span class="font-sans text-xs uppercase tracking-[0.4em] text-bloom-purple font-bold">Experiências Bloom</span>
+                    <h2 class="text-6xl font-serif mt-4 text-bloom-graphite">Menu de Serviços</h2>
+                    <div class="w-24 h-1 bg-bloom-lilac mx-auto mt-8 rounded-full"></div>
                 </div>
 
-                {categories.map((cat, idx) => (
-                    <div key={idx} className="mb-24 last:mb-0">
-                        <h3 className="text-xs uppercase tracking-[0.3em] text-bloom-purple/40 font-bold mb-12 flex items-center gap-4">
-                            <span className="whitespace-nowrap">{cat.title}</span>
-                            <div className="w-full h-px bg-bloom-gray/50"></div>
+                ${categories.map((cat, idx) => html`
+                    <div key=${idx} class="mb-24 last:mb-0">
+                        <h3 class="text-xs uppercase tracking-[0.3em] text-bloom-purple/40 font-bold mb-12 flex items-center gap-4">
+                            <span class="whitespace-nowrap">${cat.title}</span>
+                            <div class="w-full h-px bg-bloom-gray/50"></div>
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                            {cat.items.map((item, i) => <ServiceCard key={i} {...item} />)}
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                            ${cat.items.map((item, i) => html`<${ServiceCard} key=${i} ...${item} />`)}
                         </div>
                     </div>
-                ))}
+                `)}
             </div>
         </div>
-    );
+    `;
 };
 
 export default Services;

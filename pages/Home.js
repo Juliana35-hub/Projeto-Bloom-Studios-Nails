@@ -1,5 +1,5 @@
 import React from 'react';
-import htm from 'https://esm.sh/htm';
+import htm from 'htm';
 
 const html = htm.bind(React.createElement);
 

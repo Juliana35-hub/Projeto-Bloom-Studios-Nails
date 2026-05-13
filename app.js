@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
-import htm from 'https://esm.sh/htm';
+import htm from 'htm';
 
 // Pages
 import Home from './pages/Home.js';
@@ -8,6 +8,10 @@ import Services from './pages/Services.js';
 import Gallery from './pages/Gallery.js';
 import About from './pages/About.js';
 import Booking from './pages/Booking.js';
+import Intro from './pages/Intro.js';
+import Access from './pages/Access.js';
+import Login from './pages/Login.js';
+import Signup from './pages/Signup.js';
 
 // Components
 import Navbar from './components/Navbar.js';
@@ -51,11 +55,18 @@ const Footer = () => {
 };
 
 const App = () => {
+    const [flow, setFlow] = useState('intro'); // intro, access, login, signup, main
     const [path, setPath] = useState(window.location.hash.replace('#', ''));
+    const [userType, setUserType] = useState(null); // client, admin
 
     useEffect(() => {
         const handleHashChange = () => {
-            setPath(window.location.hash.replace('#', ''));
+            const currentHash = window.location.hash.replace('#', '');
+            setPath(currentHash);
+            
+            // Allow manual hash navigation if not in intro/access
+            if (flow === 'intro' && currentHash === '') return;
+            
             window.scrollTo(0, 0);
             setTimeout(() => {
                 if (window.lucide) window.lucide.createIcons();
@@ -64,9 +75,35 @@ const App = () => {
         window.addEventListener('hashchange', handleHashChange);
         if (window.lucide) window.lucide.createIcons();
         return () => window.removeEventListener('hashchange', handleHashChange);
-    }, []);
+    }, [flow]);
 
     const renderContent = () => {
+        if (flow === 'intro') {
+            return html`<${Intro} onComplete=${() => setFlow('access')} />`;
+        }
+        
+        if (flow === 'access') {
+            return html`<${Access} onSelect=${(type) => {
+                setUserType(type);
+                setFlow('login');
+            }} />`;
+        }
+
+        if (flow === 'login') {
+            return html`<${Login} 
+                userType=${userType} 
+                onToggleAuth=${() => setFlow('signup')} 
+                onLogin=${() => setFlow('main')}
+            />`;
+        }
+
+        if (flow === 'signup') {
+            return html`<${Signup} 
+                onToggleAuth=${() => setFlow('login')} 
+            />`;
+        }
+
+        // Main App Content
         switch (path) {
             case 'servicos': return html`<${Services} />`;
             case 'galeria': return html`<${Gallery} />`;
@@ -75,6 +112,10 @@ const App = () => {
             default: return html`<${Home} />`;
         }
     };
+
+    if (flow !== 'main') {
+        return renderContent();
+    }
 
     return html`
         <div class="min-h-screen flex flex-col">
