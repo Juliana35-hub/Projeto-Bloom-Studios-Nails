@@ -578,19 +578,28 @@
                 }
             };
 
+            useEffect(() => {
+                if (success || !loading) {
+                    lucide.createIcons();
+                }
+            }, [success, loading]);
+
             if (success) {
                 return (
-                    <section id="agendar" className="py-32 px-6 bg-white text-center">
+                    <section id="agendar" className="py-32 px-6 bg-bloom-offWhite text-center reveal active">
                         <Container>
-                            <Card className="max-w-2xl mx-auto p-20 border-2 border-primary/20">
-                                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8">
-                                    <i data-lucide="check" className="w-10 h-10 text-secondary"></i>
+                            <Card className="max-w-2xl mx-auto p-12 md:p-20 border-2 border-[#7E689F]/10 shadow-bloom">
+                                <div className="w-24 h-24 bg-[#7E689F]/10 rounded-full flex items-center justify-center mx-auto mb-10">
+                                    <i data-lucide="check" className="w-12 h-12 text-[#7E689F]"></i>
                                 </div>
-                                <h2 className="text-4xl font-serif mb-6">Agendamento Realizado!</h2>
-                                <p className="text-text/60 mb-10">
-                                    Seus dados foram salvos com sucesso. Em instantes você será redirecionada para o nosso WhatsApp para a confirmação final.
+                                <h2 className="text-4xl md:text-5xl font-serif mb-6 text-[#2D2D2D]">Agendamento Enviado!</h2>
+                                <p className="text-zinc-600 text-lg mb-12 leading-relaxed">
+                                    Seus dados foram salvos com sucesso em nosso sistema. <br/>
+                                    <strong>Em instantes, o WhatsApp será aberto</strong> para a confirmação final com nossa equipe.
                                 </p>
-                                <Button onClick={() => setSuccess(false)}>Agendar outro horário</Button>
+                                <Button onClick={() => setSuccess(false)} variant="secondary" className="px-10">
+                                    Fazer outro agendamento
+                                </Button>
                             </Card>
                         </Container>
                     </section>
