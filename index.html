@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Bloom Studio Nails | Sofisticação e delicadeza em cada detalhe</title>
+    <meta name="description" content="Bloom Studio Nails — Unhas sofisticadas, delicadas e modernas em Manaus. Especialistas em alongamento em gel, nail art e cuidados premium.">
+    <meta name="keywords" content="nail designer em Manaus, alongamento de unhas, unhas premium, manicure em Manaus, nail studio, Bloom Studio Nails">
+    <meta name="author" content="Bloom Studio">
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Bloom Studio Nails | Sofisticação e delicadeza">
+    <meta property="og:description" content="Especialistas em nail design de alta performance e estética exclusiva em Manaus.">
+    <meta property="og:image" content="assets/hero-bg.png">
+    <meta name="theme-color" content="#FAF8F5">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Scripts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: "#FAF8F5",
+                        primary: "#B8A4D4",
+                        secondary: "#7E689F",
+                        nude: "#E8DDD7",
+                        text: "#2D2D2D",
+                        bloom: {
+                            offWhite: '#FAF8F5',
+                            lilac: '#B8A4D4',
+                            purple: '#7E689F',
+                            nude: '#E8DDD7',
+                            graphite: '#2D2D2D',
+                            gray: '#D9D4DD'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Cormorant Garamond', 'serif'],
+                        sans: ['Poppins', 'sans-serif']
+                    },
+                    borderRadius: { 
+                        'bloom': '24px',
+                        'card': '24px',
+                        'input': '16px'
+                    },
+                    boxShadow: { 
+                        'bloom': '0 8px 30px rgba(0,0,0,0.06)',
+                        'medium': '0 15px 40px rgba(0,0,0,0.08)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --bloom-off-white: #FAF8F5;
+            --bloom-lilac: #B8A4D4;
+            --bloom-purple: #7E689F;
+            --bloom-graphite: #2D2D2D;
+        }
+        
+        body { 
+            scroll-behavior: smooth; 
+            background-color: #FAF8F5; 
+            color: #2D2D2D; 
+            font-family: 'Poppins', sans-serif; 
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar Premium */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #FAF8F5; }
+        ::-webkit-scrollbar-thumb { 
+            background: #D9D4DD; 
+            border-radius: 10px; 
+            border: 2px solid #FAF8F5;
+        }
+        ::-webkit-scrollbar-thumb:hover { background: #B8A4D4; }
+        
+        h1, h2, h3, .serif { font-family: 'Cormorant Garamond', serif; font-weight: 300; }
+        
+        .bloom-card { 
+            background: white; 
+            border-radius: 24px; 
+            box-shadow: 0 8px 30px rgba(0,0,0,0.06); 
+            transition: all 0.3s ease-out; 
+        }
+        .bloom-card:hover { 
+            transform: translateY(-8px); 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.08); 
+        }
+        
+        .fade-in { animation: fadeIn 0.8s ease-out forwards; opacity: 0; }
+        .slide-up { animation: slideUp 0.8s ease-out forwards; opacity: 0; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float { animation: float 5s ease-in-out infinite; }
+
+        .btn-hover { transition: all 0.3s ease-out; }
+        .btn-hover:hover { transform: scale(1.05) translateY(-2px); }
+
+        .glass { 
+            background: rgba(255, 255, 255, 0.4); 
+            backdrop-blur: 20px; 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2); 
+        }
+
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s ease-out; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        .img-zoom { overflow: hidden; }
+        .img-zoom img { transition: transform 1.2s ease-out; }
+        .img-zoom:hover img { transform: scale(1.08); }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- HOOKS ---
+        const useScrollReveal = () => {
+            useEffect(() => {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('active');
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+                return () => observer.disconnect();
+            }, []);
+        };
+
+        // --- DESIGN SYSTEM COMPONENTS ---
+
+        const Container = ({ children, className = "" }) => (
+            <div className={`max-w-7xl mx-auto px-6 lg:px-12 ${className}`}>
+                {children}
+            </div>
+        );
+
+        const Badge = ({ children, className = "" }) => (
+            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#EFE8F8] border border-[#7E689F]/10 backdrop-blur-sm ${className}`}>
+                <span className="text-[9px] md:text-[10px] uppercase tracking-[0.3em] font-bold text-[#7E689F]">
+                    {children}
+                </span>
+            </div>
+        );
+
+        const Button = ({ children, variant = "primary", className = "", href, ...props }) => {
+            const baseStyles = "inline-flex items-center justify-center rounded-full px-8 py-4 md:py-5 text-[10px] uppercase tracking-[0.2em] font-bold transition-all duration-300 text-center btn-hover min-h-[52px]";
+            const variants = {
+                primary: "bg-[#7E689F] text-white shadow-lg hover:bg-[#6B5688] shadow-[0_8px_30px_rgba(0,0,0,0.06)]",
+                secondary: "border-2 border-[#7E689F] text-[#7E689F] hover:bg-[#7E689F]/5",
+                outline: "border border-[#D9D4DD] text-[#2D2D2D] hover:border-[#7E689F] hover:text-[#7E689F]"
+            };
+
+            const classes = `${baseStyles} ${variants[variant]} ${className}`;
+
+            if (href) return <a href={href} className={classes} {...props}>{children}</a>;
+            return <button className={classes} {...props}>{children}</button>;
+        };
+
+        const Card = ({ children, className = "", hover = true, reveal = true }) => (
+            <div className={`bg-white rounded-[24px] p-8 md:p-10 shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-300 ${hover ? 'hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)]' : ''} ${reveal ? 'reveal' : ''} ${className}`}>
+                {children}
+            </div>
+        );
+
+        const SectionTitle = ({ badge, title, subtitle, centered = true, className = "" }) => (
+            <div className={`mb-12 md:mb-24 ${centered ? 'text-center' : 'text-left'} ${className} reveal`}>
+                {badge && <Badge className="mb-6">{badge}</Badge>}
+                <h2 className="text-3xl md:text-5xl lg:text-6xl font-serif text-[#2D2D2D] leading-tight mt-4 font-light">
+                    {title}
+                </h2>
+                {subtitle && <p className="text-zinc-600 text-sm md:text-lg mt-6 max-w-2xl mx-auto leading-relaxed">
+                    {subtitle}
+                </p>}
+                {centered && <div className="w-20 md:w-24 h-1 bg-[#B8A4D4] mx-auto mt-6 md:mt-8 rounded-full"></div>}
+            </div>
+        );
+
+        const Input = ({ label, ...props }) => (
+            <div className="text-left w-full">
+                {label && <label className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#7E689F] ml-2 mb-2 block">{label}</label>}
+                <input 
+                    {...props} 
+                    className="w-full rounded-2xl border border-zinc-200 px-5 py-4 outline-none focus:border-[#B8A4D4] transition-all font-sans text-[#2D2D2D]" 
+                />
+            </div>
+        );
+
+        // --- LAYOUT COMPONENTS ---
+
+        const Navbar = ({ currentPath }) => {
+            const [isMenuOpen, setIsMenuOpen] = useState(false);
+            const [isScrolled, setIsScrolled] = useState(false);
+
+            useEffect(() => {
+                const handleScroll = () => setIsScrolled(window.scrollY > 20);
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            const navLinks = [
+                { name: 'Início', href: '#' },
+                { name: 'Serviços', href: '#servicos' },
+                { name: 'Galeria', href: '#galeria' },
+                { name: 'Sobre', href: '#sobre' },
+                { name: 'Contato', href: '#contato' },
+            ];
+
+            return (
+                <nav className={`fixed top-0 w-full z-[100] transition-all duration-500 ${isScrolled ? 'glass py-3 shadow-bloom' : 'bg-transparent py-6 md:py-8'}`}>
+                    <Container className="flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                            <span className="text-xl md:text-3xl font-serif font-bold text-secondary tracking-widest uppercase">Bloom</span>
+                        </div>
+                        
+                        <div className="hidden md:flex gap-10 font-sans text-[10px] uppercase tracking-[0.3em] font-bold text-text">
+                            {navLinks.map(link => (
+                                <a key={link.name} href={link.href} className="hover:text-primary transition-colors relative group">
+                                    {link.name}
+                                    <span className="absolute -bottom-1 left-0 w-0 h-px bg-primary transition-all group-hover:w-full"></span>
+                                </a>
+                            ))}
+                        </div>
+
+                        <div className="flex items-center gap-6">
+                            <Button href="#agendar" className="hidden sm:inline-flex px-8 py-3">Agendar</Button>
+                            <button onClick={() => setIsMenuOpen(true)} className="md:hidden text-secondary p-2">
+                                <i data-lucide="menu" className="w-8 h-8"></i>
+                            </button>
+                        </div>
+                    </Container>
+
+                    {/* Mobile Drawer */}
+                    <div className={`fixed inset-0 bg-text/40 backdrop-blur-md z-[110] transition-opacity duration-300 ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+                        <div className={`absolute right-0 top-0 h-full w-4/5 bg-white shadow-2xl p-10 flex flex-col transition-transform duration-500 ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+                            <div className="flex justify-between items-center mb-16">
+                                <span className="font-serif text-2xl font-bold text-secondary tracking-widest uppercase">Bloom</span>
+                                <button onClick={() => setIsMenuOpen(false)} className="text-secondary p-2">
+                                    <i data-lucide="x" className="w-8 h-8"></i>
+                                </button>
+                            </div>
+                            <div className="flex flex-col gap-8">
+                                {navLinks.map(link => (
+                                    <a key={link.name} href={link.href} onClick={() => setIsMenuOpen(false)} className="text-2xl font-serif text-text hover:text-secondary transition-colors border-b border-zinc-100 pb-4">
+                                        {link.name}
+                                    </a>
+                                ))}
+                                <Button href="#agendar" onClick={() => setIsMenuOpen(false)} className="mt-6 py-5">
+                                    Agendar Agora
+                                </Button>
+                            </div>
+                            <div className="mt-auto text-center pb-8">
+                                <p className="text-[10px] uppercase tracking-[0.4em] text-primary font-bold">Bloom Studio Nails</p>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+            );
+        };
+
+        const WhatsAppButton = () => (
+            <a href="https://wa.me/5500000000000" target="_blank" className="fixed bottom-6 right-6 z-[90] bg-[#25D366] text-white p-4 md:p-5 rounded-full shadow-2xl hover:scale-110 transition-transform flex items-center justify-center group">
+                <i data-lucide="message-circle" className="w-6 h-6 md:w-7 md:h-7"></i>
+                <span className="max-w-0 overflow-hidden group-hover:max-w-xs group-hover:ml-3 transition-all duration-500 text-[10px] font-bold uppercase tracking-widest whitespace-nowrap">
+                    WhatsApp
+                </span>
+            </a>
+        );
+
+        // --- SECTIONS ---
+
+        const Hero = () => (
+            <section className="relative min-h-screen flex items-center pt-24 md:pt-32 pb-20 overflow-hidden bg-gradient-to-b from-[#FAF8F5] to-[#F4EFFB]">
+                {/* Dynamic Blobs */}
+                <div className="absolute top-[-10%] right-[-10%] w-[400px] md:w-[600px] h-[400px] md:h-[600px] bg-[#B8A4D4] opacity-20 blur-[80px] md:blur-[120px] rounded-full animate-pulse"></div>
+                <div className="absolute bottom-[-10%] left-[-5%] w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-[#7E689F] opacity-10 blur-[80px] md:blur-[100px] rounded-full"></div>
+                
+                <Container className="relative z-10">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+                        {/* Lado Direito - Imagem (Primeiro no Mobile) */}
+                        <div className="order-1 lg:order-2 fade-in relative px-4 md:px-0">
+                            <div className="relative z-10 rounded-[32px] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.12)] aspect-[4/5] max-w-sm md:max-w-lg mx-auto lg:ml-auto transform rotate-1 hover:rotate-0 transition-all duration-1000">
+                                <img src="assets/hero-bg.png" alt="Unhas premium Bloom Studio Nails" className="w-full h-full object-cover transition-transform duration-[2000ms] hover:scale-110" loading="eager" />
+                            </div>
+                            
+                            <Card className="absolute -bottom-6 -left-2 md:-left-12 p-6 md:p-8 z-20 flex items-center gap-4 animate-float" hover={false} reveal={false}>
+                                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#B8A4D4]/20 flex items-center justify-center text-[#7E689F]">
+                                    <i data-lucide="award" className="w-5 h-5 md:w-6 md:h-6"></i>
+                                </div>
+                                <div>
+                                    <p className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-[#7E689F]">Premium Studio</p>
+                                    <p className="text-xs md:text-sm font-serif font-bold text-text">Design Exclusivo</p>
+                                </div>
+                            </Card>
+                        </div>
+
+                        {/* Lado Esquerdo - Conteúdo */}
+                        <div className="order-2 lg:order-1 slide-up text-center lg:text-left">
+                            <Badge className="mb-6 md:mb-8">Bloom Studio Nails ✨</Badge>
+
+                            <h1 className="text-4xl md:text-6xl lg:text-8xl font-serif text-text leading-tight md:leading-[1.1] mb-6 md:mb-8 font-light">
+                                Unhas que refletem <br/>sua <span className="italic text-primary">essência</span>.
+                            </h1>
+
+                            <p className="text-zinc-600 text-base md:text-xl font-sans mb-10 md:mb-12 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                                Sofisticação, delicadeza e autenticidade em cada detalhe do seu nail design.
+                            </p>
+
+                            <div className="flex flex-col sm:flex-row gap-4 md:gap-6 mb-12">
+                                <Button href="#agendar" className="w-full sm:w-auto px-10 py-5">Agendar horário</Button>
+                                <Button href="#galeria" variant="secondary" className="w-full sm:w-auto px-10 py-5">Ver trabalhos</Button>
+                            </div>
+
+                            {/* Mini Infos */}
+                            <div className="flex flex-wrap justify-center lg:justify-start gap-6 md:gap-8">
+                                {["Atendimento personalizado", "Ambiente sofisticado", "Serviços premium"].map(text => (
+                                    <div key={text} className="flex items-center gap-3 text-text/60 text-[9px] md:text-[10px] font-bold uppercase tracking-[0.2em]">
+                                        <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-primary/20 flex items-center justify-center text-secondary">
+                                            <i data-lucide="check" className="w-3 h-3 md:w-4 md:h-4"></i>
+                                        </div>
+                                        <span>{text}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </Container>
+            </section>
+        );
+
+        const Services = () => {
+            const services = [
+                { title: "Alongamento em Gel", desc: "Unhas longas e resistentes com acabamento vitrificado impecável.", icon: "sparkles" },
+                { title: "Banho em Gel", desc: "Fortalecimento e brilho para suas unhas naturais crescerem saudáveis.", icon: "shield-check" },
+                { title: "Nail Art", desc: "Expressão artística personalizada com designs únicos feitos à mão.", icon: "palette" },
+                { title: "Manutenção", desc: "Cuidado técnico periódico para garantir a perfeição do seu design.", icon: "refresh-cw" },
+                { title: "Blindagem", desc: "Camada protetora para nivelamento e resistência extra.", icon: "gem" },
+                { title: "Esmaltação em Gel", desc: "Cor intensa com secagem imediata e durabilidade de semanas.", icon: "sun" }
+            ];
+
+            return (
+                <section id="servicos" className="py-20 md:py-32 bg-white relative">
+                    <Container>
+                        <SectionTitle 
+                            badge="Menu de Experiências"
+                            title="Nossos Serviços"
+                            subtitle="Cada procedimento é realizado com produtos de alta performance e técnicas exclusivas Bloom."
+                        />
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
+                            {services.map((s, i) => (
+                                <Card key={i} className="group p-10 md:p-12">
+                                    <div className="w-14 h-14 md:w-16 md:h-16 bg-background text-secondary rounded-full flex items-center justify-center mb-6 md:mb-8 group-hover:bg-primary group-hover:text-white transition-all duration-500">
+                                        <i data-lucide={s.icon} className="w-7 h-7 md:w-8 md:h-8"></i>
+                                    </div>
+                                    <h3 className="text-2xl md:text-3xl font-serif mb-4 text-text tracking-wide">{s.title}</h3>
+                                    <p className="text-text/50 text-sm leading-relaxed mb-8">
+                                        {s.desc}
+                                    </p>
+                                    <a href="#agendar" className="inline-flex items-center gap-2 text-secondary font-bold text-[10px] uppercase tracking-[0.2em] border-b-2 border-primary/30 pb-1 hover:border-secondary transition-all">
+                                        Saiba mais <i data-lucide="arrow-right" className="w-3 h-3"></i>
+                                    </a>
+                                </Card>
+                            ))}
+                        </div>
+                    </Container>
+                </section>
+            );
+        };
+
+        const Gallery = () => {
+            const images = [
+                { src: 'assets/nails-1.png', size: 'small' },
+                { src: 'assets/nails-1.png', size: 'large' },
+                { src: 'assets/hero-bg.png', size: 'small' },
+                { src: 'assets/nails-1.png', size: 'small' },
+                { src: 'assets/nails-1.png', size: 'small' }
+            ];
+
+            return (
+                <section id="galeria" className="py-20 md:py-32 bg-background">
+                    <Container>
+                        <div className="flex flex-col md:flex-row justify-between items-center md:items-end mb-16 md:mb-20 gap-8">
+                            <SectionTitle 
+                                badge="Visual Authority"
+                                title="Galeria de Arte"
+                                centered={false}
+                                className="mb-0 md:mb-0 text-center md:text-left"
+                            />
+                            <Button href="https://instagram.com" variant="secondary" className="flex items-center gap-3 w-full md:w-auto">
+                                <i data-lucide="instagram" className="w-5 h-5"></i>
+                                Seguir no Instagram
+                            </Button>
+                        </div>
+
+                        <div className="columns-2 md:columns-3 lg:columns-4 gap-4 md:gap-8">
+                            {images.map((img, i) => (
+                                <div key={i} className="gallery-item group relative overflow-hidden rounded-[20px] md:rounded-[30px] shadow-bloom cursor-pointer bg-white mb-4 md:mb-8 reveal img-zoom">
+                                    <img src={img.src} alt={`Nail Design Bloom Studio Nails ${i+1}`} className="w-full h-auto object-cover" loading="lazy" />
+                                    <div className="absolute inset-0 bg-secondary/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-sm">
+                                        <div className="p-4 md:p-8 border border-white/30 rounded-bloom scale-90 group-hover:scale-100 transition-transform duration-300">
+                                            <i data-lucide="plus" className="w-6 h-6 md:w-10 md:h-10 text-white"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </Container>
+                </section>
+            );
+        };
+
+        const About = () => (
+            <section id="sobre" className="py-20 md:py-32 bg-white overflow-hidden">
+                <Container>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center">
+                        <div className="relative fade-in px-4 md:px-0">
+                            <div className="rounded-[60px] md:rounded-[80px] overflow-hidden shadow-2xl relative z-10 border-[10px] md:border-[15px] border-background">
+                                <img src="assets/hero-bg.png" alt="Atendimento personalizado Bloom Studio Nails" className="w-full h-full object-cover" loading="lazy" />
+                            </div>
+                            <div className="absolute -top-10 -right-10 w-48 h-48 bg-primary/20 rounded-full -z-0"></div>
+                            <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-nude/30 rounded-full blur-2xl -z-0"></div>
+                        </div>
+
+                        <div className="text-center lg:text-left">
+                            <SectionTitle 
+                                badge="Nossa História"
+                                title="Onde o cuidado se torna perfeição."
+                                centered={false}
+                                className="text-center lg:text-left"
+                            />
+                            <div className="space-y-6 md:space-y-8 text-text/60 leading-relaxed text-base md:text-lg italic mb-10 md:mb-12">
+                                <p>
+                                    "O Bloom Studio Nails nasceu da visão de que a beleza está na delicadeza dos detalhes. Nossa missão é proporcionar um refúgio de sofisticação para mulheres que buscam excelência."
+                                </p>
+                            </div>
+                            <div className="space-y-6 max-w-lg mx-auto lg:mx-0">
+                                {[
+                                    { t: 'Experiência Personalizada', d: 'Cada cliente é única, e seu design também.' },
+                                    { t: 'Produtos Selecionados', d: 'Apenas as melhores marcas globais no seu atendimento.' }
+                                ].map((item, i) => (
+                                    <div key={i} className="flex gap-6 text-left">
+                                        <div className="w-10 h-10 rounded-full bg-background flex items-center justify-center flex-shrink-0">
+                                            <i data-lucide="check" className="w-5 h-5 text-secondary"></i>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-serif text-xl font-bold">{item.t}</h4>
+                                            <p className="text-sm text-gray-500">{item.d}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </Container>
+            </section>
+        );
+
+        const Testimonials = () => {
+            const reviews = [
+                { name: "Mariana Costa", text: "Experiência impecável! O ambiente é lindo e minhas unhas nunca duraram tanto. Simplesmente amei cada detalhe.", rate: 5 },
+                { name: "Letícia Oliveira", text: "O melhor atendimento que já recebi. A técnica da Bloom é diferenciada, muito cuidado e delicadeza no processo.", rate: 5 },
+                { name: "Beatriz Santos", text: "Perfeição define. O espaço é um refúgio de paz e o resultado do design ficou exatamente como eu queria.", rate: 5 }
+            ];
+
+            return (
+                <section className="py-32 bg-bloom-offWhite relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-bloom-lilac to-transparent"></div>
+                    <Container>
+                        <SectionTitle 
+                            badge="Social Proof"
+                            title="Vozes que Inspiram"
+                            subtitle="A satisfação de nossas clientes é o reflexo da nossa paixão pela perfeição."
+                        />
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                            {reviews.map((r, i) => (
+                                <Card key={i} className="bg-white/50 backdrop-blur-sm border border-white">
+                                    <div className="flex gap-1 mb-8 text-bloom-lilac">
+                                        {[...Array(r.rate)].map((_, i) => <i key={i} data-lucide="star" className="w-4 h-4 fill-current"></i>)}
+                                    </div>
+                                    <p className="text-bloom-graphite/70 italic text-lg leading-relaxed mb-10">"{r.text}"</p>
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-full bg-bloom-lilac/30 flex items-center justify-center font-bold text-bloom-purple">
+                                            {r.name[0]}
+                                        </div>
+                                        <span className="font-sans font-bold text-[10px] uppercase tracking-widest">{r.name}</span>
+                                    </div>
+                                </Card>
+                            ))}
+                        </div>
+                    </Container>
+                </section>
+            );
+        };
+
+        const CTA = () => (
+            <section className="py-32 px-6">
+                <Container>
+                    <div className="bg-bloom-lilac/30 rounded-[60px] p-12 md:p-24 text-center relative overflow-hidden border border-bloom-lilac/20">
+                        <div className="relative z-10 slide-up">
+                            <h2 className="text-5xl md:text-7xl font-serif mb-8 text-bloom-graphite leading-tight">
+                                Viva a experiência <br/><span className="italic text-bloom-purple">Bloom Studio.</span>
+                            </h2>
+                            <p className="text-bloom-graphite/60 text-lg mb-12 max-w-xl mx-auto leading-relaxed">
+                                Agende seu horário agora e descubra a sofisticação que suas unhas merecem.
+                            </p>
+                            <Button href="#agendar" className="inline-flex items-center gap-4 px-14 py-6 text-xl">
+                                Entrar em contato <i data-lucide="calendar" className="w-6 h-6"></i>
+                            </Button>
+                        </div>
+                        {/* Decorative elements */}
+                        <div className="absolute top-0 right-0 w-80 h-80 bg-white/30 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
+                        <div className="absolute bottom-0 left-0 w-64 h-64 bg-bloom-purple/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl"></div>
+                    </div>
+                </Container>
+            </section>
+        );
+
+        const Footer = () => (
+            <footer className="bg-text text-white py-16 md:py-24 px-6 border-t border-white/5">
+                <Container>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-12 md:gap-20 mb-16 md:mb-20">
+                        <div className="sm:col-span-2">
+                            <h3 className="font-serif text-3xl md:text-4xl mb-6 md:mb-8 tracking-widest uppercase">Bloom</h3>
+                            <p className="text-gray-400 text-sm leading-relaxed max-w-sm mb-8 md:mb-10">
+                                Especialistas em nail design de alta performance e estética exclusiva. Elevando sua essência através da arte em cada detalhe.
+                            </p>
+                            <div className="flex gap-6">
+                                {['instagram', 'facebook'].map(icon => (
+                                    <a key={icon} href="#" className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:bg-white hover:text-text transition-all">
+                                        <i data-lucide={icon} className="w-5 h-5"></i>
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+                        <div>
+                            <h4 className="font-sans font-bold text-[10px] uppercase tracking-[0.4em] text-primary mb-8">Navegação</h4>
+                            <ul className="text-gray-400 text-xs space-y-4 font-bold tracking-widest uppercase">
+                                <li><a href="#" className="hover:text-white transition-colors">Início</a></li>
+                                <li><a href="#servicos" className="hover:text-white transition-colors">Serviços</a></li>
+                                <li><a href="#galeria" className="hover:text-white transition-colors">Galeria</a></li>
+                                <li><a href="#sobre" className="hover:text-white transition-colors">Sobre</a></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 className="font-sans font-bold text-[10px] uppercase tracking-[0.4em] text-primary mb-8">Atendimento</h4>
+                            <ul className="text-gray-400 text-xs space-y-4 font-medium leading-relaxed">
+                                <li className="flex gap-3"><i data-lucide="map-pin" className="w-4 h-4 text-primary"></i> Av. das Flores, 1000 - Centro</li>
+                                <li className="flex gap-3"><i data-lucide="clock" className="w-4 h-4 text-primary"></i> Ter à Sáb: 09h - 19h</li>
+                                <li className="flex gap-3"><i data-lucide="phone" className="w-4 h-4 text-primary"></i> (00) 00000-0000</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div className="pt-8 md:pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 md:gap-8 text-[9px] md:text-[10px] text-gray-500 uppercase tracking-[0.4em] font-bold text-center">
+                        <p>© 2026 Bloom Studio Nails. All rights reserved.</p>
+                        <p className="flex items-center gap-2">Design by <span className="text-white">Bloom Agency</span></p>
+                    </div>
+                </Container>
+            </footer>
+        );
+
+        // --- MAIN APP ---
+
+        const App = () => {
+            useScrollReveal();
+            
+            useEffect(() => {
+                lucide.createIcons();
+            }, []);
+
+            return (
+                <div className="min-h-screen">
+                    <Navbar />
+                    <main>
+                        <Hero />
+                        <Services />
+                        <Gallery />
+                        <About />
+                        <Testimonials />
+                        <CTA />
+                    </main>
+                    <Footer />
+                    <WhatsAppButton />
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

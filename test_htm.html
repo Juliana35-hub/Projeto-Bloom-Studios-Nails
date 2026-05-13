@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTM Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div id="root"></div>
+    <script type="module">
+        import React from 'https://esm.sh/react@18';
+        import ReactDOM from 'https://esm.sh/react-dom@18/client';
+        import htm from 'https://esm.sh/htm';
+
+        const html = htm.bind(React.createElement);
+
+        const App = () => {
+            return html`
+                <div class="p-8 bg-white rounded-xl shadow-2xl text-center">
+                    <h1 class="text-3xl font-bold text-purple-600">Bloom Studio</h1>
+                    <p class="mt-4 text-gray-600">React + HTM is working natively! ✨</p>
+                </div>
+            `;
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(html`<${App} />`);
+    </script>
+</body>
+</html>

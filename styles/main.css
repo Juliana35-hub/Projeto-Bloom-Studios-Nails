@@ -1,0 +1,95 @@
+/* Custom Bloom Styles - Official Identity */
+
+:root {
+    --bloom-off-white: #FAF8F5;
+    --bloom-lilac: #B8A4D4;
+    --bloom-purple: #7E689F;
+    --bloom-nude: #E8DDD7;
+    --bloom-graphite: #2D2D2D;
+    --bloom-gray: #D9D4DD;
+}
+
+body {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    background-color: var(--bloom-off-white);
+    color: var(--bloom-graphite);
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Typography */
+h1, h2, h3, .serif {
+    font-family: 'Cormorant Garamond', serif;
+}
+
+/* Base Styles */
+.bloom-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+    transition: all 0.3s ease;
+}
+
+.bloom-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.8s ease-out forwards;
+}
+
+/* Glassmorphism */
+.glass {
+    background: rgba(250, 248, 245, 0.8);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(126, 104, 159, 0.1);
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--bloom-purple);
+    color: white;
+    border-radius: 20px;
+    padding: 12px 32px;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.btn-primary:hover {
+    background-color: var(--bloom-lilac);
+    transform: scale(1.02);
+}
+
+.btn-secondary {
+    border: 2px solid var(--bloom-purple);
+    color: var(--bloom-purple);
+    border-radius: 20px;
+    padding: 12px 32px;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.btn-secondary:hover {
+    background-color: rgba(126, 104, 159, 0.05);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bloom-off-white);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bloom-lilac);
+    border-radius: 10px;
+}
