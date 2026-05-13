@@ -21,15 +21,25 @@ const Signup = ({ onToggleAuth, onSignupSuccess }) => {
             const { data, error } = await supabase.auth.signUp({
                 email,
                 password,
-                options: {
-                    data: {
-                        full_name: name,
-                        whatsapp: phone,
-                    }
-                }
             });
 
             if (error) throw error;
+
+            if (data.user) {
+                // Salva o perfil na tabela 'profiles'
+                const { error: profileError } = await supabase
+                    .from('profiles')
+                    .insert([
+                        { 
+                            id: data.user.id, 
+                            full_name: name, 
+                            whatsapp: phone,
+                            email: email
+                        }
+                    ]);
+                
+                if (profileError) console.error("Erro ao salvar perfil:", profileError.message);
+            }
             
             alert("Cadastro realizado com sucesso! Agora você pode fazer o login.");
             onToggleAuth(); // Volta para a tela de Login
