@@ -73,6 +73,7 @@ const Layout = ({ children }) => {
 
 const App = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [userType, setUserType] = useState(null);
 
     // Initial navigation
