@@ -43,7 +43,7 @@ CREATE POLICY "Permitir leitura apenas para Admin autenticado" ON appointments F
 
 ALTER TABLE gallery ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Leitura pública da galeria" ON gallery FOR SELECT USING (true);
-CREATE POLICY "Admin gerencia galeria" ON gallery ALL USING (auth.role() = 'authenticated');
+CREATE POLICY "Admin gerencia galeria" ON gallery FOR ALL USING (auth.role() = 'authenticated');
 
 -- 6. Inserir alguns serviços base (opcional)
 INSERT INTO services (title, description, duration) VALUES 

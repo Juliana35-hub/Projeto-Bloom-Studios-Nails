@@ -558,11 +558,7 @@
                             }
                         ]);
 
-                    if (error) {
-                        console.error("Supabase Error:", error);
-                        alert(`Erro do Banco de Dados: ${error.message} (Código: ${error.code})`);
-                        throw error;
-                    }
+                    if (error) throw error;
 
                     setSuccess(true);
                     
