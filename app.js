@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import htm from 'htm';
-import { HashRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 
 // Pages
 import Home from './pages/Home.js';
@@ -33,9 +31,9 @@ const Footer = () => html`
             <div>
                 <h4 class="font-sans font-bold text-[10px] uppercase tracking-[0.3em] text-bloom-lilac mb-6">Explorar</h4>
                 <ul class="text-gray-400 text-sm space-y-4 font-medium">
-                    <li><a href="#/" class="hover:text-white transition-colors">Início</a></li>
-                    <li><a href="#/servicos" class="hover:text-white transition-colors">Serviços</a></li>
-                    <li><a href="#/galeria" class="hover:text-white transition-colors">Galeria</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Início</a></li>
+                    <li><a href="#servicos" class="hover:text-white transition-colors">Serviços</a></li>
+                    <li><a href="#galeria" class="hover:text-white transition-colors">Galeria</a></li>
                 </ul>
             </div>
             <div>
@@ -50,71 +48,75 @@ const Footer = () => html`
     </footer>
 `;
 
-const Layout = ({ children }) => {
-    const location = useLocation();
-    const hideNavPaths = ['/intro', '/access', '/login', '/signup'];
-    const showNav = !hideNavPaths.includes(location.pathname);
+const App = () => {
+    const [flow, setFlow] = useState('intro'); // intro, access, login, signup, main
+    const [path, setPath] = useState(window.location.hash.replace('#', ''));
+    const [userType, setUserType] = useState(null);
 
     useEffect(() => {
+        const handleHashChange = () => {
+            setPath(window.location.hash.replace('#', ''));
+            window.scrollTo(0, 0);
+            setTimeout(() => {
+                if (window.lucide) window.lucide.createIcons();
+            }, 100);
+        };
+        window.addEventListener('hashchange', handleHashChange);
         if (window.lucide) window.lucide.createIcons();
-    }, [location]);
+        return () => window.removeEventListener('hashchange', handleHashChange);
+    }, []);
+
+    const renderContent = () => {
+        if (flow === 'intro') {
+            return html`<${Intro} onComplete=${() => setFlow('access')} />`;
+        }
+        
+        if (flow === 'access') {
+            return html`<${Access} onSelect=${(type) => {
+                setUserType(type);
+                setFlow('login');
+            }} />`;
+        }
+
+        if (flow === 'login') {
+            return html`<${Login} 
+                userType=${userType} 
+                onToggleAuth=${() => setFlow('signup')} 
+                onLogin=${() => setFlow('main')}
+            />`;
+        }
+
+        if (flow === 'signup') {
+            return html`<${Signup} 
+                onToggleAuth=${() => setFlow('login')} 
+            />`;
+        }
+
+        // Main App Content
+        switch (path) {
+            case 'servicos': return html`<${Services} />`;
+            case 'galeria': return html`<${Gallery} />`;
+            case 'sobre': return html`<${About} />`;
+            case 'agendar': return html`<${Booking} />`;
+            default: return html`<${Home} />`;
+        }
+    };
+
+    if (flow !== 'main') {
+        return renderContent();
+    }
 
     return html`
         <div class="min-h-screen flex flex-col">
-            ${showNav && html`<${Navbar} currentPath=${location.pathname} />`}
+            <${Navbar} currentPath=${path} />
             <main class="flex-grow">
-                ${children}
+                ${renderContent()}
             </main>
-            ${showNav && html`<${Footer} />`}
-            ${showNav && html`<${WhatsAppButton} />`}
+            <${Footer} />
+            <${WhatsAppButton} />
         </div>
     `;
 };
 
-const App = () => {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const [userType, setUserType] = useState(null);
-
-    // Initial navigation
-    useEffect(() => {
-        if (window.location.hash === '' || window.location.hash === '#/') {
-            navigate('/intro');
-        }
-    }, []);
-
-    return html`
-        <${Layout}>
-            <${AnimatePresence} mode="wait">
-                <${Routes} location=${location} key=${location.pathname}>
-                    <${Route} path="/intro" element=${html`<${Intro} onComplete=${() => navigate('/access')} />`} />
-                    <${Route} path="/access" element=${html`<${Access} onSelect=${(type) => {
-                        setUserType(type);
-                        navigate('/login');
-                    }} />`} />
-                    <${Route} path="/login" element=${html`<${Login} 
-                        userType=${userType} 
-                        onToggleAuth=${() => navigate('/signup')} 
-                        onLogin=${() => navigate('/')}
-                    />`} />
-                    <${Route} path="/signup" element=${html`<${Signup} 
-                        onToggleAuth=${() => navigate('/login')} 
-                    />`} />
-                    
-                    <${Route} path="/" element=${html`<${Home} />`} />
-                    <${Route} path="/servicos" element=${html`<${Services} />`} />
-                    <${Route} path="/galeria" element=${html`<${Gallery} />`} />
-                    <${Route} path="/sobre" element=${html`<${About} />`} />
-                    <${Route} path="/agendar" element=${html`<${Booking} />`} />
-                </${Routes}>
-            </${AnimatePresence}>
-        </${Layout}>
-    `;
-};
-
 const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(html`
-    <${HashRouter}>
-        <${App} />
-    </${HashRouter}>
-`);
+root.render(html`<${App} />`);
