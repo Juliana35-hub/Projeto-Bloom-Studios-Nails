@@ -537,15 +537,37 @@
                 time: '',
                 notes: ''
             });
+            const [availableSlots, setAvailableSlots] = useState([]);
             const [loading, setLoading] = useState(false);
             const [success, setSuccess] = useState(false);
 
+            useEffect(() => {
+                if (formData.date) {
+                    fetchAvailableSlots(formData.date);
+                }
+            }, [formData.date]);
+
+            const fetchAvailableSlots = async (selectedDate) => {
+                const { data, error } = await supabase
+                    .from('slots')
+                    .select('time')
+                    .eq('date', selectedDate)
+                    .eq('status', 'available');
+                
+                if (error) console.error("Erro ao buscar horários:", error);
+                else setAvailableSlots(data.map(s => s.time.substring(0, 5)));
+            };
+
             const handleSubmit = async (e) => {
                 e.preventDefault();
+                if (!formData.time) {
+                    alert("Por favor, selecione um horário disponível.");
+                    return;
+                }
                 setLoading(true);
 
                 try {
-                    const { data, error } = await supabase
+                    const { error } = await supabase
                         .from('appointments')
                         .insert([
                             { 
@@ -560,11 +582,17 @@
 
                     if (error) throw error;
 
+                    // Marcar horário como reservado
+                    await supabase
+                        .from('slots')
+                        .update({ status: 'booked' })
+                        .eq('date', formData.date)
+                        .eq('time', formData.time);
+
                     setSuccess(true);
                     
-                    // Enviar para o WhatsApp
                     const message = `Olá! Gostaria de confirmar meu agendamento na Bloom Studio Nails. ✨\n\n📝 *Detalhes do Pedido:*\n👤 Nome: ${formData.name}\n💅 Serviço: ${formData.service}\n📅 Data: ${formData.date}\n⏰ Horário: ${formData.time}\n💬 Notas: ${formData.notes || 'Nenhuma'}`;
-                    const whatsappUrl = `https://wa.me/5500000000000?text=${encodeURIComponent(message)}`;
+                    const whatsappUrl = `https://wa.me/5592992021064?text=${encodeURIComponent(message)}`;
                     
                     setTimeout(() => {
                         window.open(whatsappUrl, '_blank');
@@ -572,7 +600,7 @@
 
                 } catch (err) {
                     console.error("Erro ao agendar:", err);
-                    alert("Ocorreu um erro ao processar seu agendamento. Por favor, tente novamente.");
+                    alert("Ocorreu um erro ao processar seu agendamento.");
                 } finally {
                     setLoading(false);
                 }
@@ -682,13 +710,19 @@
                                             value={formData.date}
                                             onChange={e => setFormData({...formData, date: e.target.value})}
                                         />
-                                        <Input 
-                                            label="Horário" 
-                                            type="time" 
-                                            required
-                                            value={formData.time}
-                                            onChange={e => setFormData({...formData, time: e.target.value})}
-                                        />
+                                        <div className="text-left w-full">
+                                            <label className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#7E689F] ml-2 mb-2 block">Horários Disponíveis</label>
+                                            <select 
+                                                className="w-full rounded-2xl border border-zinc-200 px-5 py-4 outline-none focus:border-[#B8A4D4] bg-white transition-all font-sans text-[#2D2D2D] appearance-none disabled:bg-zinc-50"
+                                                required
+                                                disabled={!formData.date}
+                                                value={formData.time}
+                                                onChange={e => setFormData({...formData, time: e.target.value})}
+                                            >
+                                                <option value="">{formData.date ? (availableSlots.length > 0 ? 'Selecione um horário' : 'Nenhum horário disponível') : 'Selecione uma data primeiro'}</option>
+                                                {availableSlots.map(t => <option key={t} value={t}>{t}</option>)}
+                                            </select>
+                                        </div>
                                     </div>
 
                                     <div className="text-left w-full">
@@ -715,11 +749,15 @@
 
         const AdminDashboard = () => {
             const [appointments, setAppointments] = useState([]);
+            const [slots, setSlots] = useState([]);
             const [loading, setLoading] = useState(true);
+            const [view, setView] = useState('appointments'); // appointments, slots
+            const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
             useEffect(() => {
                 fetchAppointments();
-            }, []);
+                fetchSlots();
+            }, [selectedDate, view]);
 
             const fetchAppointments = async () => {
                 const { data, error } = await supabase
@@ -730,6 +768,33 @@
                 if (error) console.error("Erro ao buscar agendamentos:", error);
                 else setAppointments(data);
                 setLoading(false);
+            };
+
+            const fetchSlots = async () => {
+                const { data, error } = await supabase
+                    .from('slots')
+                    .select('*')
+                    .eq('date', selectedDate);
+                
+                if (error) console.error("Erro ao buscar horários:", error);
+                else setSlots(data);
+            };
+
+            const addSlot = async (time) => {
+                const { error } = await supabase
+                    .from('slots')
+                    .insert([{ date: selectedDate, time: `${time}:00`, status: 'available' }]);
+                
+                if (error) {
+                    if (error.code === '23505') alert("Este horário já existe!");
+                    else alert("Erro ao adicionar horário");
+                } else fetchSlots();
+            };
+
+            const deleteSlot = async (id) => {
+                const { error } = await supabase.from('slots').delete().eq('id', id);
+                if (error) alert("Erro ao excluir");
+                else fetchSlots();
             };
 
             const updateStatus = async (id, status) => {
@@ -748,53 +813,102 @@
                         <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
                             <div>
                                 <h1 className="text-4xl font-serif">Painel Administrativo</h1>
-                                <p className="text-text/50">Gerencie seus agendamentos e atendimentos.</p>
+                                <p className="text-text/50">Gerencie seu estúdio de forma profissional.</p>
                             </div>
-                            <Button variant="outline" onClick={() => window.location.hash = ''}>
-                                <i data-lucide="log-out" className="w-4 h-4 mr-2"></i> Sair do Painel
-                            </Button>
+                            <div className="flex gap-4">
+                                <Button variant={view === 'appointments' ? 'primary' : 'outline'} onClick={() => setView('appointments')}>Agendamentos</Button>
+                                <Button variant={view === 'slots' ? 'primary' : 'outline'} onClick={() => setView('slots')}>Gerenciar Agenda</Button>
+                                <Button variant="outline" onClick={() => window.location.hash = ''}>
+                                    <i data-lucide="log-out" className="w-4 h-4"></i>
+                                </Button>
+                            </div>
                         </div>
 
-                        <div className="grid gap-6">
-                            {loading ? (
-                                <div className="text-center py-20">Carregando agendamentos...</div>
-                            ) : appointments.map(app => (
-                                <Card key={app.id} hover={false} className="p-8 border border-white/50">
-                                    <div className="flex flex-col md:flex-row justify-between gap-8">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-3 mb-4">
-                                                <Badge className={
-                                                    app.status === 'pendente' ? 'bg-yellow-100 text-yellow-700' : 
-                                                    app.status === 'confirmado' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
-                                                }>{app.status}</Badge>
-                                                <span className="text-[10px] text-text/40 uppercase font-bold">{new Date(app.created_at).toLocaleDateString()}</span>
+                        {view === 'appointments' ? (
+                            <div className="grid gap-6">
+                                {loading ? (
+                                    <div className="text-center py-20">Carregando agendamentos...</div>
+                                ) : appointments.map(app => (
+                                    <Card key={app.id} hover={false} className="p-8 border border-white/50">
+                                        <div className="flex flex-col md:flex-row justify-between gap-8">
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-3 mb-4">
+                                                    <Badge className={
+                                                        app.status === 'pendente' ? 'bg-yellow-100 text-yellow-700' : 
+                                                        app.status === 'confirmado' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                                                    }>{app.status}</Badge>
+                                                    <span className="text-[10px] text-text/40 uppercase font-bold">{new Date(app.created_at).toLocaleDateString()}</span>
+                                                </div>
+                                                <h3 className="text-2xl font-serif mb-2">{app.client_name}</h3>
+                                                <div className="flex flex-wrap gap-6 text-sm text-text/60">
+                                                    <span className="flex items-center gap-2"><i data-lucide="phone" className="w-4 h-4"></i> {app.client_whatsapp}</span>
+                                                    <span className="flex items-center gap-2"><i data-lucide="sparkles" className="w-4 h-4"></i> {app.service}</span>
+                                                    <span className="flex items-center gap-2"><i data-lucide="calendar" className="w-4 h-4"></i> {app.appointment_date} às {app.appointment_time}</span>
+                                                </div>
+                                                {app.notes && <p className="mt-4 p-4 bg-background rounded-xl text-sm italic">"{app.notes}"</p>}
                                             </div>
-                                            <h3 className="text-2xl font-serif mb-2">{app.client_name}</h3>
-                                            <div className="flex flex-wrap gap-6 text-sm text-text/60">
-                                                <span className="flex items-center gap-2"><i data-lucide="phone" className="w-4 h-4"></i> {app.client_whatsapp}</span>
-                                                <span className="flex items-center gap-2"><i data-lucide="sparkles" className="w-4 h-4"></i> {app.service}</span>
-                                                <span className="flex items-center gap-2"><i data-lucide="calendar" className="w-4 h-4"></i> {app.appointment_date} às {app.appointment_time}</span>
+                                            <div className="flex md:flex-col gap-2 justify-center">
+                                                <button 
+                                                    onClick={() => updateStatus(app.id, 'confirmado')}
+                                                    className="p-3 bg-green-50 text-green-600 rounded-xl hover:bg-green-600 hover:text-white transition-all shadow-sm"
+                                                >
+                                                    <i data-lucide="check-circle" className="w-5 h-5"></i>
+                                                </button>
+                                                <button 
+                                                    onClick={() => updateStatus(app.id, 'cancelado')}
+                                                    className="p-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm"
+                                                >
+                                                    <i data-lucide="x-circle" className="w-5 h-5"></i>
+                                                </button>
                                             </div>
-                                            {app.notes && <p className="mt-4 p-4 bg-background rounded-xl text-sm italic">"{app.notes}"</p>}
                                         </div>
-                                        <div className="flex md:flex-col gap-2 justify-center">
-                                            <button 
-                                                onClick={() => updateStatus(app.id, 'confirmado')}
-                                                className="p-3 bg-green-50 text-green-600 rounded-xl hover:bg-green-600 hover:text-white transition-all shadow-sm"
-                                            >
-                                                <i data-lucide="check-circle" className="w-5 h-5"></i>
-                                            </button>
-                                            <button 
-                                                onClick={() => updateStatus(app.id, 'cancelado')}
-                                                className="p-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm"
-                                            >
-                                                <i data-lucide="x-circle" className="w-5 h-5"></i>
-                                            </button>
+                                    </Card>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="space-y-12">
+                                <Card className="p-10 border border-white">
+                                    <h3 className="text-2xl font-serif mb-8">Abrir Horários para {new Date(selectedDate).toLocaleDateString()}</h3>
+                                    <div className="flex flex-col md:flex-row gap-6 items-end">
+                                        <Input label="Selecionar Data" type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} />
+                                        <div className="flex-1 grid grid-cols-3 sm:grid-cols-6 gap-3">
+                                            {['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'].map(time => (
+                                                <button 
+                                                    key={time}
+                                                    onClick={() => addSlot(time)}
+                                                    className="py-3 rounded-xl border border-[#7E689F]/20 text-[10px] font-bold uppercase tracking-widest hover:bg-[#7E689F] hover:text-white transition-all"
+                                                >
+                                                    + {time}
+                                                </button>
+                                            ))}
                                         </div>
                                     </div>
                                 </Card>
-                            ))}
-                        </div>
+
+                                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                                    {slots.length > 0 ? slots.map(slot => (
+                                        <div key={slot.id} className="bg-white p-4 rounded-2xl shadow-sm border border-[#7E689F]/5 flex justify-between items-center group">
+                                            <div className="flex flex-col">
+                                                <span className="text-lg font-serif font-bold text-[#7E689F]">{slot.time.substring(0, 5)}</span>
+                                                <Badge className={`text-[8px] py-1 ${slot.status === 'booked' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                                                    {slot.status === 'available' ? 'Livre' : 'Reservado'}
+                                                </Badge>
+                                            </div>
+                                            <button 
+                                                onClick={() => deleteSlot(slot.id)}
+                                                className="text-red-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                                            >
+                                                <i data-lucide="trash-2" className="w-4 h-4"></i>
+                                            </button>
+                                        </div>
+                                    )) : (
+                                        <div className="col-span-full py-20 text-center text-text/40 border-2 border-dashed border-zinc-200 rounded-[40px]">
+                                            Nenhum horário aberto para esta data.
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </Container>
                 </div>
             );

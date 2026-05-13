@@ -50,3 +50,17 @@ INSERT INTO services (title, description, duration) VALUES
 ('Alongamento em Gel', 'Unhas longas e resistentes com acabamento impecável.', '2h 30min'),
 ('Banho em Gel', 'Fortalecimento e brilho para suas unhas naturais.', '1h 30min'),
 ('Nail Art', 'Design artístico exclusivo feito à mão.', '30min - 1h');
+
+-- 7. Tabela de Horários Disponíveis
+CREATE TABLE IF NOT EXISTS slots (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    date DATE NOT NULL,
+    time TIME NOT NULL,
+    status TEXT DEFAULT 'available', -- available, blocked, booked
+    UNIQUE(date, time)
+);
+
+-- Habilitar RLS
+ALTER TABLE slots ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Leitura pública de horários" ON slots FOR SELECT USING (true);
+CREATE POLICY "Admin gerencia horários" ON slots FOR ALL USING (auth.role() = 'authenticated');
