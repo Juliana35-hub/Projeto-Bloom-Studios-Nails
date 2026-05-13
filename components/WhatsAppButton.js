@@ -4,7 +4,7 @@ import htm from 'htm';
 const html = htm.bind(React.createElement);
 
 const WhatsAppButton = () => {
-    const phoneNumber = "5500000000000"; // Placeholder, user can change
+    const phoneNumber = "5592992021064"; 
     const message = encodeURIComponent("Oi! Vim pelo site e gostaria de agendar um horário na Bloom Studio Nails. ✨");
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
 
