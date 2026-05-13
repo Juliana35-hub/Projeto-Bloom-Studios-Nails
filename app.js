@@ -92,14 +92,8 @@ const App = () => {
             />`;
         }
 
-        // Main App Content
-        switch (path) {
-            case 'servicos': return html`<${Services} />`;
-            case 'galeria': return html`<${Gallery} />`;
-            case 'sobre': return html`<${About} />`;
-            case 'agendar': return html`<${Booking} />`;
-            default: return html`<${Home} />`;
-        }
+        // Main App Content - One Page Experience
+        return html`<${Home} />`;
     };
 
     if (flow !== 'main') {
