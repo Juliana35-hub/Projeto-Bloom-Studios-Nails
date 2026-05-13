@@ -21,13 +21,18 @@ const Login = ({ onToggleAuth, userType, onLogin }) => {
                 password,
             });
 
-            if (error) throw error;
+            if (error) {
+                if (error.message.includes("Email not confirmed")) {
+                    throw new Error("Por favor, confirme seu e-mail antes de entrar ou desative a confirmação no painel do Supabase.");
+                }
+                throw error;
+            }
             
             console.log("Login realizado com sucesso:", data);
             onLogin(); // Redireciona para o site completo (flow: 'main')
         } catch (err) {
             console.error("Erro no login:", err.message);
-            setError("E-mail ou senha incorretos.");
+            setError(err.message);
         } finally {
             setLoading(false);
         }
