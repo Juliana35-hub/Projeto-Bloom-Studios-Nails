@@ -15,11 +15,10 @@ const Navbar = ({ currentPath }) => {
                 <a href="#servicos" class="hover:text-bloom-lilac transition-colors ${currentPath === 'servicos' ? 'text-bloom-purple' : ''}">Serviços</a>
                 <a href="#galeria" class="hover:text-bloom-lilac transition-colors ${currentPath === 'galeria' ? 'text-bloom-purple' : ''}">Galeria</a>
                 <a href="#sobre" class="hover:text-bloom-lilac transition-colors ${currentPath === 'sobre' ? 'text-bloom-purple' : ''}">Sobre</a>
-                <a href="#contato" class="hover:text-bloom-lilac transition-colors ${currentPath === 'contato' ? 'text-bloom-purple' : ''}">Contato</a>
             </div>
 
             <div class="flex items-center gap-4">
-                <a href="#agendar" class="btn-primary text-xs uppercase tracking-widest shadow-bloom">
+                <a href="#agendar" class="bg-bloom-purple text-white px-8 py-3 rounded-full text-[10px] uppercase tracking-widest font-bold shadow-lg hover:scale-105 active:scale-95 transition-all duration-300">
                     Agendar Horário
                 </a>
             </div>

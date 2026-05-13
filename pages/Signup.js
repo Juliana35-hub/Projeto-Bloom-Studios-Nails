@@ -1,9 +1,46 @@
 import React, { useState } from 'react';
 import htm from 'htm';
+import { supabase } from '../lib/supabase.js';
 
 const html = htm.bind(React.createElement);
 
-const Signup = ({ onToggleAuth }) => {
+const Signup = ({ onToggleAuth, onSignupSuccess }) => {
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [phone, setPhone] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    const handleSignup = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        try {
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        full_name: name,
+                        whatsapp: phone,
+                    }
+                }
+            });
+
+            if (error) throw error;
+            
+            alert("Cadastro realizado com sucesso! Agora você pode fazer o login.");
+            onToggleAuth(); // Volta para a tela de Login
+        } catch (err) {
+            console.error("Erro no cadastro:", err.message);
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return html`
         <div class="min-h-screen bg-white flex flex-col md:flex-row overflow-hidden">
             <!-- Left Side: Image -->
@@ -25,11 +62,16 @@ const Signup = ({ onToggleAuth }) => {
                         <p class="text-bloom-graphite/50 mt-4 text-sm">Preencha seus dados para começar.</p>
                     </div>
 
-                    <form class="space-y-4">
+                    <form class="space-y-4" onSubmit=${handleSignup}>
+                        ${error && html`<div class="bg-red-50 text-red-500 text-xs p-4 rounded-xl font-bold uppercase tracking-widest">${error}</div>`}
+                        
                         <div class="space-y-1">
                             <label class="text-[10px] uppercase tracking-widest font-bold text-bloom-purple ml-2">Nome Completo</label>
                             <input 
                                 type="text" 
+                                required
+                                value=${name}
+                                onChange=${e => setName(e.target.value)}
                                 placeholder="Maria Silva" 
                                 class="w-full p-4 rounded-bloom bg-white border border-transparent focus:border-bloom-lilac outline-none transition-all shadow-sm font-sans"
                             />
@@ -39,6 +81,9 @@ const Signup = ({ onToggleAuth }) => {
                             <label class="text-[10px] uppercase tracking-widest font-bold text-bloom-purple ml-2">WhatsApp</label>
                             <input 
                                 type="tel" 
+                                required
+                                value=${phone}
+                                onChange=${e => setPhone(e.target.value)}
                                 placeholder="(00) 00000-0000" 
                                 class="w-full p-4 rounded-bloom bg-white border border-transparent focus:border-bloom-lilac outline-none transition-all shadow-sm font-sans"
                             />
@@ -48,6 +93,9 @@ const Signup = ({ onToggleAuth }) => {
                             <label class="text-[10px] uppercase tracking-widest font-bold text-bloom-purple ml-2">E-mail</label>
                             <input 
                                 type="email" 
+                                required
+                                value=${email}
+                                onChange=${e => setEmail(e.target.value)}
                                 placeholder="exemplo@email.com" 
                                 class="w-full p-4 rounded-bloom bg-white border border-transparent focus:border-bloom-lilac outline-none transition-all shadow-sm font-sans"
                             />
@@ -57,16 +105,20 @@ const Signup = ({ onToggleAuth }) => {
                             <label class="text-[10px] uppercase tracking-widest font-bold text-bloom-purple ml-2">Senha</label>
                             <input 
                                 type="password" 
+                                required
+                                value=${password}
+                                onChange=${e => setPassword(e.target.value)}
                                 placeholder="••••••••" 
                                 class="w-full p-4 rounded-bloom bg-white border border-transparent focus:border-bloom-lilac outline-none transition-all shadow-sm font-sans"
                             />
                         </div>
 
                         <button 
-                            type="button"
-                            class="w-full py-5 bg-bloom-purple text-white rounded-bloom font-bold uppercase tracking-widest text-xs shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 mt-4"
+                            type="submit"
+                            disabled=${loading}
+                            class="w-full py-5 bg-bloom-purple text-white rounded-bloom font-bold uppercase tracking-widest text-xs shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 mt-4 disabled:opacity-50"
                         >
-                            Criar minha conta
+                            ${loading ? 'Criando conta...' : 'Criar minha conta'}
                         </button>
 
                         <div class="pt-6 text-center">
