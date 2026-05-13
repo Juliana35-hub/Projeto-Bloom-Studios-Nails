@@ -26,6 +26,7 @@
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
         tailwind.config = {
@@ -138,6 +139,11 @@
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
+
+        // Supabase Configuration
+        const SUPABASE_URL = "https://phggtslcefmhmksiupqt.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBoZ2d0c2xjZWZtaG1rc2l1cHF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MzQ5MDUsImV4cCI6MjA5NDIxMDkwNX0.OmHqa90Ph6Jj96rEbnlr10kOuize8wqlPqIcLgvZMQY";
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // --- HOOKS ---
         const useScrollReveal = () => {
@@ -522,28 +528,268 @@
             );
         };
 
-        const CTA = () => (
-            <section className="py-32 px-6">
-                <Container>
-                    <div className="bg-bloom-lilac/30 rounded-[60px] p-12 md:p-24 text-center relative overflow-hidden border border-bloom-lilac/20">
-                        <div className="relative z-10 slide-up">
-                            <h2 className="text-5xl md:text-7xl font-serif mb-8 text-bloom-graphite leading-tight">
-                                Viva a experiência <br/><span className="italic text-bloom-purple">Bloom Studio.</span>
-                            </h2>
-                            <p className="text-bloom-graphite/60 text-lg mb-12 max-w-xl mx-auto leading-relaxed">
-                                Agende seu horário agora e descubra a sofisticação que suas unhas merecem.
-                            </p>
-                            <Button href="#agendar" className="inline-flex items-center gap-4 px-14 py-6 text-xl">
-                                Entrar em contato <i data-lucide="calendar" className="w-6 h-6"></i>
+        const BookingForm = () => {
+            const [formData, setFormData] = useState({
+                name: '',
+                phone: '',
+                service: 'Alongamento em Gel',
+                date: '',
+                time: '',
+                notes: ''
+            });
+            const [loading, setLoading] = useState(false);
+            const [success, setSuccess] = useState(false);
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setLoading(true);
+
+                try {
+                    const { data, error } = await supabase
+                        .from('appointments')
+                        .insert([
+                            { 
+                                client_name: formData.name, 
+                                client_whatsapp: formData.phone,
+                                service: formData.service,
+                                appointment_date: formData.date,
+                                appointment_time: formData.time,
+                                notes: formData.notes
+                            }
+                        ]);
+
+                    if (error) throw error;
+
+                    setSuccess(true);
+                    
+                    // Enviar para o WhatsApp
+                    const message = `Olá! Gostaria de confirmar meu agendamento na Bloom Studio Nails. ✨\n\n📝 *Detalhes do Pedido:*\n👤 Nome: ${formData.name}\n💅 Serviço: ${formData.service}\n📅 Data: ${formData.date}\n⏰ Horário: ${formData.time}\n💬 Notas: ${formData.notes || 'Nenhuma'}`;
+                    const whatsappUrl = `https://wa.me/5500000000000?text=${encodeURIComponent(message)}`;
+                    
+                    setTimeout(() => {
+                        window.open(whatsappUrl, '_blank');
+                    }, 2000);
+
+                } catch (err) {
+                    console.error("Erro ao agendar:", err);
+                    alert("Ocorreu um erro ao processar seu agendamento. Por favor, tente novamente.");
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            if (success) {
+                return (
+                    <section id="agendar" className="py-32 px-6 bg-white text-center">
+                        <Container>
+                            <Card className="max-w-2xl mx-auto p-20 border-2 border-primary/20">
+                                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8">
+                                    <i data-lucide="check" className="w-10 h-10 text-secondary"></i>
+                                </div>
+                                <h2 className="text-4xl font-serif mb-6">Agendamento Realizado!</h2>
+                                <p className="text-text/60 mb-10">
+                                    Seus dados foram salvos com sucesso. Em instantes você será redirecionada para o nosso WhatsApp para a confirmação final.
+                                </p>
+                                <Button onClick={() => setSuccess(false)}>Agendar outro horário</Button>
+                            </Card>
+                        </Container>
+                    </section>
+                );
+            }
+
+            return (
+                <section id="agendar" className="py-32 px-6 bg-background relative overflow-hidden">
+                    <Container>
+                        <div className="grid lg:grid-cols-2 gap-20 items-center">
+                            <div className="reveal">
+                                <SectionTitle 
+                                    badge="Reserve seu momento"
+                                    title="Sinta a experiência Bloom no seu dia."
+                                    subtitle="Escolha o melhor horário para cuidar de você. Nossa equipe entrará em contato para confirmar sua reserva."
+                                    centered={false}
+                                />
+                                <div className="space-y-8 mt-12">
+                                    <div className="flex gap-6 items-start">
+                                        <div className="w-12 h-12 rounded-2xl bg-white shadow-bloom flex items-center justify-center flex-shrink-0">
+                                            <i data-lucide="clock" className="w-6 h-6 text-secondary"></i>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-serif text-xl font-bold">Atendimento Ágil</h4>
+                                            <p className="text-sm text-text/50">Confirmação em até 15 minutos durante horário comercial.</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-6 items-start">
+                                        <div className="w-12 h-12 rounded-2xl bg-white shadow-bloom flex items-center justify-center flex-shrink-0">
+                                            <i data-lucide="shield-check" className="w-6 h-6 text-secondary"></i>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-serif text-xl font-bold">Reserva Garantida</h4>
+                                            <p className="text-sm text-text/50">Seu horário fica bloqueado no sistema automaticamente.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <Card className="p-12 md:p-16 border border-white reveal" hover={false}>
+                                <form onSubmit={handleSubmit} className="space-y-6">
+                                    <div className="grid md:grid-cols-2 gap-6">
+                                        <Input 
+                                            label="Nome Completo" 
+                                            placeholder="Ex: Maria Silva" 
+                                            required
+                                            value={formData.name}
+                                            onChange={e => setFormData({...formData, name: e.target.value})}
+                                        />
+                                        <Input 
+                                            label="WhatsApp" 
+                                            placeholder="(00) 00000-0000" 
+                                            required
+                                            value={formData.phone}
+                                            onChange={e => setFormData({...formData, phone: e.target.value})}
+                                        />
+                                    </div>
+                                    
+                                    <div className="text-left w-full">
+                                        <label className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#7E689F] ml-2 mb-2 block">Serviço Desejado</label>
+                                        <select 
+                                            className="w-full rounded-2xl border border-zinc-200 px-5 py-4 outline-none focus:border-[#B8A4D4] bg-white transition-all font-sans text-[#2D2D2D] appearance-none"
+                                            value={formData.service}
+                                            onChange={e => setFormData({...formData, service: e.target.value})}
+                                        >
+                                            <option>Alongamento em Gel</option>
+                                            <option>Banho em Gel</option>
+                                            <option>Nail Art</option>
+                                            <option>Manutenção</option>
+                                            <option>Blindagem</option>
+                                            <option>Esmaltação em Gel</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="grid md:grid-cols-2 gap-6">
+                                        <Input 
+                                            label="Data" 
+                                            type="date" 
+                                            required
+                                            value={formData.date}
+                                            onChange={e => setFormData({...formData, date: e.target.value})}
+                                        />
+                                        <Input 
+                                            label="Horário" 
+                                            type="time" 
+                                            required
+                                            value={formData.time}
+                                            onChange={e => setFormData({...formData, time: e.target.value})}
+                                        />
+                                    </div>
+
+                                    <div className="text-left w-full">
+                                        <label className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#7E689F] ml-2 mb-2 block">Observações (Opcional)</label>
+                                        <textarea 
+                                            className="w-full rounded-2xl border border-zinc-200 px-5 py-4 outline-none focus:border-[#B8A4D4] transition-all font-sans text-[#2D2D2D] min-h-[100px]"
+                                            placeholder="Algum detalhe específico?"
+                                            value={formData.notes}
+                                            onChange={e => setFormData({...formData, notes: e.target.value})}
+                                        />
+                                    </div>
+
+                                    <Button type="submit" className="w-full py-6 text-base" disabled={loading}>
+                                        {loading ? 'Processando...' : 'Confirmar Agendamento'}
+                                    </Button>
+                                    <p className="text-[10px] text-center text-text/40 uppercase tracking-widest">A confirmação final será via WhatsApp</p>
+                                </form>
+                            </Card>
+                        </div>
+                    </Container>
+                </section>
+            );
+        };
+
+        const AdminDashboard = () => {
+            const [appointments, setAppointments] = useState([]);
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                fetchAppointments();
+            }, []);
+
+            const fetchAppointments = async () => {
+                const { data, error } = await supabase
+                    .from('appointments')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) console.error("Erro ao buscar agendamentos:", error);
+                else setAppointments(data);
+                setLoading(false);
+            };
+
+            const updateStatus = async (id, status) => {
+                const { error } = await supabase
+                    .from('appointments')
+                    .update({ status })
+                    .eq('id', id);
+
+                if (error) alert("Erro ao atualizar status");
+                else fetchAppointments();
+            };
+
+            return (
+                <div className="min-h-screen bg-[#F1F3F6] pt-32 pb-20">
+                    <Container>
+                        <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
+                            <div>
+                                <h1 className="text-4xl font-serif">Painel Administrativo</h1>
+                                <p className="text-text/50">Gerencie seus agendamentos e atendimentos.</p>
+                            </div>
+                            <Button variant="outline" onClick={() => window.location.hash = ''}>
+                                <i data-lucide="log-out" className="w-4 h-4 mr-2"></i> Sair do Painel
                             </Button>
                         </div>
-                        {/* Decorative elements */}
-                        <div className="absolute top-0 right-0 w-80 h-80 bg-white/30 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
-                        <div className="absolute bottom-0 left-0 w-64 h-64 bg-bloom-purple/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl"></div>
-                    </div>
-                </Container>
-            </section>
-        );
+
+                        <div className="grid gap-6">
+                            {loading ? (
+                                <div className="text-center py-20">Carregando agendamentos...</div>
+                            ) : appointments.map(app => (
+                                <Card key={app.id} hover={false} className="p-8 border border-white/50">
+                                    <div className="flex flex-col md:flex-row justify-between gap-8">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-3 mb-4">
+                                                <Badge className={
+                                                    app.status === 'pendente' ? 'bg-yellow-100 text-yellow-700' : 
+                                                    app.status === 'confirmado' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                                                }>{app.status}</Badge>
+                                                <span className="text-[10px] text-text/40 uppercase font-bold">{new Date(app.created_at).toLocaleDateString()}</span>
+                                            </div>
+                                            <h3 className="text-2xl font-serif mb-2">{app.client_name}</h3>
+                                            <div className="flex flex-wrap gap-6 text-sm text-text/60">
+                                                <span className="flex items-center gap-2"><i data-lucide="phone" className="w-4 h-4"></i> {app.client_whatsapp}</span>
+                                                <span className="flex items-center gap-2"><i data-lucide="sparkles" className="w-4 h-4"></i> {app.service}</span>
+                                                <span className="flex items-center gap-2"><i data-lucide="calendar" className="w-4 h-4"></i> {app.appointment_date} às {app.appointment_time}</span>
+                                            </div>
+                                            {app.notes && <p className="mt-4 p-4 bg-background rounded-xl text-sm italic">"{app.notes}"</p>}
+                                        </div>
+                                        <div className="flex md:flex-col gap-2 justify-center">
+                                            <button 
+                                                onClick={() => updateStatus(app.id, 'confirmado')}
+                                                className="p-3 bg-green-50 text-green-600 rounded-xl hover:bg-green-600 hover:text-white transition-all shadow-sm"
+                                            >
+                                                <i data-lucide="check-circle" className="w-5 h-5"></i>
+                                            </button>
+                                            <button 
+                                                onClick={() => updateStatus(app.id, 'cancelado')}
+                                                className="p-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm"
+                                            >
+                                                <i data-lucide="x-circle" className="w-5 h-5"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </Card>
+                            ))}
+                        </div>
+                    </Container>
+                </div>
+            );
+        };
 
         const Footer = () => (
             <footer className="bg-text text-white py-16 md:py-24 px-6 border-t border-white/5">
@@ -591,25 +837,51 @@
         // --- MAIN APP ---
 
         const App = () => {
+            const [isAdmin, setIsAdmin] = useState(false);
             useScrollReveal();
             
             useEffect(() => {
-                lucide.createIcons();
+                const handleHash = () => {
+                    setIsAdmin(window.location.hash === '#admin');
+                    lucide.createIcons();
+                };
+                window.addEventListener('hashchange', handleHash);
+                handleHash();
+                return () => window.removeEventListener('hashchange', handleHash);
             }, []);
 
+            if (isAdmin) {
+                return (
+                    <div className="app-container bg-background min-h-screen">
+                        <Navbar currentPath="admin" />
+                        <AdminDashboard />
+                        <Footer />
+                    </div>
+                );
+            }
+
             return (
-                <div className="min-h-screen">
+                <div className="app-container bg-background">
                     <Navbar />
-                    <main>
-                        <Hero />
-                        <Services />
-                        <Gallery />
-                        <About />
-                        <Testimonials />
-                        <CTA />
-                    </main>
+                    <Hero />
+                    <Services />
+                    <Gallery />
+                    <About />
+                    <Testimonials />
+                    <BookingForm />
                     <Footer />
-                    <WhatsAppButton />
+                    
+                    {/* WhatsApp Button */}
+                    <a 
+                        href="https://wa.me/5500000000000" 
+                        target="_blank" 
+                        className="fixed bottom-8 right-8 w-16 h-16 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-2xl z-[100] transition-all duration-300 hover:scale-110 active:scale-95 group"
+                    >
+                        <i data-lucide="message-circle" className="w-8 h-8 fill-current"></i>
+                        <span className="absolute right-20 bg-white text-text text-[10px] uppercase tracking-widest font-bold px-4 py-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap pointer-events-none">
+                            Falar com especialista
+                        </span>
+                    </a>
                 </div>
             );
         };
