@@ -1,14 +1,14 @@
-# Bloom Studios Nails 2.2 - Fresh Start Sync
+# Bloom Studios Nails - Git Sync Automation
 function Sync-GitHub {
-    Write-Host "🔄 Sincronizando novo projeto Bloom Deluxe..." -ForegroundColor Cyan
+    Write-Host "🔄 Sincronizando alterações da Bloom Deluxe..." -ForegroundColor Cyan
     git add .
-    $message = "Fresh Start: Bloom Studios Nails 2.2 - Official Direction Implementation"
+    $message = "Update: Bloom Studios Nails - Design Refinements & strategic CTAs"
     git commit -m $message
-    git push origin master
+    git push origin main
     if ($LASTEXITCODE -eq 0) {
-        Write-Host "✅ GitHub atualizado com a nova Identidade Visual Oficial!" -ForegroundColor Green
+        Write-Host "✅ GitHub atualizado com sucesso!" -ForegroundColor Green
     } else {
-        Write-Host "⚠️ Remote 'origin' no encontrado ou erro no push. Configure o remote para automatizar." -ForegroundColor Yellow
+        Write-Host "⚠️ Erro ao sincronizar. Verifique a conexão ou as configurações do remote." -ForegroundColor Yellow
     }
 }
 Sync-GitHub
