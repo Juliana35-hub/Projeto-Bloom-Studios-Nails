@@ -5,7 +5,7 @@ const html = htm.bind(React.createElement);
 
 const About = () => {
     return html`
-        <div class="pt-32 pb-24 px-6 fade-in bg-bloom-offWhite min-h-screen">
+        <div id="sobre" class="py-32 px-6 fade-in bg-white reveal">
             <div class="max-w-6xl mx-auto">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
                     <div class="relative">

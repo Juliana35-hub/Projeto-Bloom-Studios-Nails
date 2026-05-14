@@ -33,7 +33,7 @@ const Booking = () => {
     };
 
     return html`
-        <div class="pt-32 pb-24 px-6 fade-in bg-bloom-offWhite min-h-screen flex items-center">
+        <div id="agendar" class="py-32 px-6 fade-in bg-bloom-offWhite reveal">
             <div class="max-w-4xl mx-auto w-full">
                 <div class="text-center mb-16">
                     <span class="font-sans text-xs uppercase tracking-[0.4em] text-bloom-purple font-bold">Agendamento Online</span>

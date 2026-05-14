@@ -14,7 +14,7 @@ const Gallery = () => {
     ];
 
     return html`
-        <div class="pt-32 pb-24 px-6 fade-in bg-bloom-offWhite min-h-screen">
+        <div id="galeria" class="py-32 px-6 fade-in bg-bloom-offWhite reveal">
             <div class="max-w-6xl mx-auto">
                 <div class="text-center mb-24">
                     <span class="font-sans text-xs uppercase tracking-[0.4em] text-bloom-purple font-bold">Inspiration Grid</span>

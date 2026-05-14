@@ -41,9 +41,9 @@ const Services = () => {
     ];
 
     return html`
-        <div class="pt-32 pb-24 px-6 fade-in bg-bloom-offWhite">
+        <div id="servicos" class="py-32 px-6 fade-in bg-white reveal">
             <div class="max-w-6xl mx-auto">
-                <div class="text-center mb-24">
+                <div class="text-center mb-24 reveal">
                     <span class="font-sans text-xs uppercase tracking-[0.4em] text-bloom-purple font-bold">Experiências Bloom</span>
                     <h2 class="text-6xl font-serif mt-4 text-bloom-graphite">Menu de Serviços</h2>
                     <div class="w-24 h-1 bg-bloom-lilac mx-auto mt-8 rounded-full"></div>
